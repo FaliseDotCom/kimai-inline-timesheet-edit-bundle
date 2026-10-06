@@ -1,0 +1,15 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  KimaiPlugin\InlineTimesheetEditBundle\:
+    resource: '../../*'
+    exclude:
+      - '../../Resources/'
+      - '../../Exception/'
+
+  KimaiPlugin\InlineTimesheetEditBundle\Controller\:
+    resource: '../../Controller'
+    tags: [ 'controller.service_arguments' ]

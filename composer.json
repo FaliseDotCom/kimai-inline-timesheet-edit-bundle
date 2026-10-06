@@ -1,0 +1,29 @@
+{
+  "name": "falisedotcom/kimai-inline-timesheet-edit-bundle",
+  "description": "Edit your own Kimai records directly in the record list: click a record, Tab between its fields and press Enter to save",
+  "homepage": "https://github.com/FaliseDotCom/ha-kimai",
+  "type": "kimai-plugin",
+  "version": "1.0.0",
+  "keywords": [ "kimai", "kimai-plugin" ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sander Falise"
+    }
+  ],
+  "extra":
+  {
+    "kimai":
+    {
+      "require": 26700,
+      "name": "Inline timesheet editing"
+    }
+  },
+  "autoload":
+  {
+    "psr-4":
+    {
+      "KimaiPlugin\\InlineTimesheetEditBundle\\": ""
+    }
+  }
+}

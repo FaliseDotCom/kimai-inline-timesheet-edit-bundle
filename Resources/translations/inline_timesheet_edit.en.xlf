@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="en" datatype="plaintext" original="none">
+    <body>
+      <trans-unit id="inline_edit.hint" resname="inline_edit.hint">
+        <source>inline_edit.hint</source>
+        <target>Click to edit this record. Tab moves between fields, Enter saves, Escape cancels.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_time" resname="inline_edit.invalid_time">
+        <source>inline_edit.invalid_time</source>
+        <target>Enter a valid time, for example 9:00 or 945.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_duration" resname="inline_edit.invalid_duration">
+        <source>inline_edit.invalid_duration</source>
+        <target>Enter a valid duration, for example 1:30, 90 or 1h30m.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_date" resname="inline_edit.invalid_date">
+        <source>inline_edit.invalid_date</source>
+        <target>Enter a valid date.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_project" resname="inline_edit.invalid_project">
+        <source>inline_edit.invalid_project</source>
+        <target>This project cannot be chosen.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_activity" resname="inline_edit.invalid_activity">
+        <source>inline_edit.invalid_activity</source>
+        <target>This activity cannot be booked on the project of this record.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.choose_activity" resname="inline_edit.choose_activity">
+        <source>inline_edit.choose_activity</source>
+        <target>Choose an activity for this project.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.unknown_tags" resname="inline_edit.unknown_tags">
+        <source>inline_edit.unknown_tags</source>
+        <target>One or more tags do not exist, and you may not create tags.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.not_editable" resname="inline_edit.not_editable">
+        <source>inline_edit.not_editable</source>
+        <target>This record cannot be changed here.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.save_failed" resname="inline_edit.save_failed">
+        <source>inline_edit.save_failed</source>
+        <target>The change could not be saved.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.tags_placeholder" resname="inline_edit.tags_placeholder">
+        <source>inline_edit.tags_placeholder</source>
+        <target>Tags, separated by commas</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="nl" datatype="plaintext" original="none">
+    <body>
+      <trans-unit id="inline_edit.hint" resname="inline_edit.hint">
+        <source>inline_edit.hint</source>
+        <target>Klik om deze registratie te bewerken. Tab gaat naar het volgende veld, Enter slaat op, Escape annuleert.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_time" resname="inline_edit.invalid_time">
+        <source>inline_edit.invalid_time</source>
+        <target>Vul een geldige tijd in, bijvoorbeeld 9:00 of 945.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_duration" resname="inline_edit.invalid_duration">
+        <source>inline_edit.invalid_duration</source>
+        <target>Vul een geldige duur in, bijvoorbeeld 1:30, 90 of 1h30m.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_date" resname="inline_edit.invalid_date">
+        <source>inline_edit.invalid_date</source>
+        <target>Vul een geldige datum in.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_project" resname="inline_edit.invalid_project">
+        <source>inline_edit.invalid_project</source>
+        <target>Dit project kan niet worden gekozen.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.invalid_activity" resname="inline_edit.invalid_activity">
+        <source>inline_edit.invalid_activity</source>
+        <target>Deze activiteit kan niet op het project van deze registratie worden geboekt.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.choose_activity" resname="inline_edit.choose_activity">
+        <source>inline_edit.choose_activity</source>
+        <target>Kies een activiteit voor dit project.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.unknown_tags" resname="inline_edit.unknown_tags">
+        <source>inline_edit.unknown_tags</source>
+        <target>Een of meer tags bestaan niet, en je mag geen tags aanmaken.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.not_editable" resname="inline_edit.not_editable">
+        <source>inline_edit.not_editable</source>
+        <target>Deze registratie kan hier niet worden gewijzigd.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.save_failed" resname="inline_edit.save_failed">
+        <source>inline_edit.save_failed</source>
+        <target>De wijziging kon niet worden opgeslagen.</target>
+      </trans-unit>
+      <trans-unit id="inline_edit.tags_placeholder" resname="inline_edit.tags_placeholder">
+        <source>inline_edit.tags_placeholder</source>
+        <target>Tags, gescheiden door komma's</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
