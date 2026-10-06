@@ -46,6 +46,50 @@
         <source>inline_edit.tags_placeholder</source>
         <target>Tags, gescheiden door komma's</target>
       </trans-unit>
+      <trans-unit id="quick_create.new_project" resname="quick_create.new_project">
+        <source>quick_create.new_project</source>
+        <target>Nieuw project</target>
+      </trans-unit>
+      <trans-unit id="quick_create.new_activity" resname="quick_create.new_activity">
+        <source>quick_create.new_activity</source>
+        <target>Nieuwe activiteit</target>
+      </trans-unit>
+      <trans-unit id="quick_create.project_name" resname="quick_create.project_name">
+        <source>quick_create.project_name</source>
+        <target>Projectnaam</target>
+      </trans-unit>
+      <trans-unit id="quick_create.customer_name" resname="quick_create.customer_name">
+        <source>quick_create.customer_name</source>
+        <target>Klant, nieuw of bestaand</target>
+      </trans-unit>
+      <trans-unit id="quick_create.activity_name" resname="quick_create.activity_name">
+        <source>quick_create.activity_name</source>
+        <target>Naam van de activiteit</target>
+      </trans-unit>
+      <trans-unit id="quick_create.add" resname="quick_create.add">
+        <source>quick_create.add</source>
+        <target>Toevoegen</target>
+      </trans-unit>
+      <trans-unit id="quick_create.name_required" resname="quick_create.name_required">
+        <source>quick_create.name_required</source>
+        <target>Vul een naam in van maximaal 150 tekens.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.create_project" resname="quick_create.create_project">
+        <source>quick_create.create_project</source>
+        <target>Je mag geen projecten aanmaken.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.create_customer" resname="quick_create.create_customer">
+        <source>quick_create.create_customer</source>
+        <target>Deze klant bestaat nog niet en je mag geen klanten aanmaken.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.create_activity" resname="quick_create.create_activity">
+        <source>quick_create.create_activity</source>
+        <target>Je mag geen activiteiten aanmaken.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.failed" resname="quick_create.failed">
+        <source>quick_create.failed</source>
+        <target>Dit kon niet worden aangemaakt. Laad de pagina opnieuw en probeer het nog eens.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

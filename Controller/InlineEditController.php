@@ -12,6 +12,7 @@ use KimaiPlugin\InlineTimesheetEditBundle\Exception\InvalidInputException;
 use KimaiPlugin\InlineTimesheetEditBundle\Service\BookingOptions;
 use KimaiPlugin\InlineTimesheetEditBundle\Service\EntryDescriber;
 use KimaiPlugin\InlineTimesheetEditBundle\Service\EntryEditor;
+use KimaiPlugin\InlineTimesheetEditBundle\Service\QuickCreator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,6 +32,8 @@ final class InlineEditController extends AbstractController
   public const ROUTE_ENTRIES = 'inline_timesheet_edit_entries';
   public const ROUTE_OPTIONS = 'inline_timesheet_edit_options';
   public const ROUTE_SAVE = 'inline_timesheet_edit_save';
+  public const ROUTE_CREATE_PROJECT = 'inline_timesheet_edit_create_project';
+  public const ROUTE_CREATE_ACTIVITY = 'inline_timesheet_edit_create_activity';
 
   /**
    * Name of the posted array of changed values, by field.
@@ -50,12 +53,14 @@ final class InlineEditController extends AbstractController
    * @param EntryDescriber $describer Finds and describes the user's editable records.
    * @param EntryEditor $editor Changes and saves a record.
    * @param BookingOptions $options The projects, activities and tags to pick from.
+   * @param QuickCreator $creator Creates projects, customers and activities from the "+" buttons.
    * @param TranslatorInterface $translator Translates error messages for the script.
    */
   public function __construct(
     private readonly EntryDescriber $describer,
     private readonly EntryEditor $editor,
     private readonly BookingOptions $options,
+    private readonly QuickCreator $creator,
     private readonly TranslatorInterface $translator
   )
   {
@@ -77,14 +82,68 @@ final class InlineEditController extends AbstractController
   }
 
   /**
-   * Lists the projects, activities and tags the user can pick.
+   * Lists the projects, activities and tags the user can pick, and what they may create.
    *
    * @return JsonResponse
    */
   #[Route( path: '/options', name: self::ROUTE_OPTIONS, methods: [ 'GET' ] )]
   public function options() : JsonResponse
   {
-    return new JsonResponse( $this->options->describe( $this->getEnabledUser() ) );
+    $user = $this->getEnabledUser();
+    $permissions = $this->creator->getPermissions();
+
+    return new JsonResponse( $this->options->describe( $user ) + [
+      'quickCreate' => $permissions + [ 'customers' => $permissions[ 'project' ] ? $this->creator->getCustomerNames( $user ) : [] ],
+    ] );
+  }
+
+  /**
+   * Creates a project, and its customer when that is new, from the "+" next to the project.
+   *
+   * @param Request $request The posted _token, name and customer.
+   * @return JsonResponse
+   */
+  #[Route( path: '/project', name: self::ROUTE_CREATE_PROJECT, methods: [ 'POST' ] )]
+  public function createProject( Request $request ) : JsonResponse
+  {
+    $user = $this->getEnabledUser();
+
+    return $this->respondToCreate( $request, function () use ( $request, $user ) : array
+    {
+      $project = $this->creator->createProject( $user, (string) $request->request->get( 'name' ), (string) $request->request->get( 'customer' ) );
+
+      return [
+        'id' => (int) $project->getId(),
+        'name' => (string) $project->getName(),
+        'customer' => (string) $project->getCustomer()?->getName(),
+        'globalActivities' => $project->isGlobalActivities(),
+      ];
+    } );
+  }
+
+  /**
+   * Creates an activity from the "+" next to the activity, for the given project when that
+   * only allows its own activities.
+   *
+   * @param Request $request The posted _token, name and project.
+   * @return JsonResponse
+   */
+  #[Route( path: '/activity', name: self::ROUTE_CREATE_ACTIVITY, methods: [ 'POST' ] )]
+  public function createActivity( Request $request ) : JsonResponse
+  {
+    $user = $this->getEnabledUser();
+
+    return $this->respondToCreate( $request, function () use ( $request, $user ) : array
+    {
+      $project = $this->creator->findProject( $user, $request->request->getInt( 'project' ) );
+      $activity = $this->creator->createActivity( $user, (string) $request->request->get( 'name' ), $project );
+
+      return [
+        'id' => (int) $activity->getId(),
+        'name' => (string) $activity->getName(),
+        'projectId' => (int) $activity->getProject()?->getId(),
+      ];
+    } );
   }
 
   /**
@@ -138,6 +197,34 @@ final class InlineEditController extends AbstractController
     }
 
     return $changes;
+  }
+
+  /**
+   * Checks the token, runs a creation and turns refusals into an error message.
+   *
+   * @param Request $request The posted form.
+   * @param callable(): array<string, mixed> $create Creates the item and describes it.
+   * @return JsonResponse
+   */
+  private function respondToCreate( Request $request, callable $create ) : JsonResponse
+  {
+    if ( !$this->isCsrfTokenValid( self::CSRF_TOKEN_ID, (string) $request->request->get( '_token' ) ) )
+    {
+      return $this->respondWithError( $this->translate( 'quick_create.failed' ) );
+    }
+
+    try
+    {
+      return new JsonResponse( $create() );
+    }
+    catch ( InvalidInputException $exception )
+    {
+      return $this->respondWithError( $this->translate( $exception->getMessage() ) );
+    }
+    catch ( ValidationFailedException $exception )
+    {
+      return $this->respondWithError( $this->describeViolations( $exception ) );
+    }
   }
 
   /**

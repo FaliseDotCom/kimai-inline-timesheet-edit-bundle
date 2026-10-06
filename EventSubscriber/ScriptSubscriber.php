@@ -55,6 +55,12 @@ final class ScriptSubscriber implements EventSubscriberInterface
     'chooseActivity' => 'inline_edit.choose_activity',
     'saveFailed' => 'inline_edit.save_failed',
     'tagsPlaceholder' => 'inline_edit.tags_placeholder',
+    'newProject' => 'quick_create.new_project',
+    'newActivity' => 'quick_create.new_activity',
+    'projectName' => 'quick_create.project_name',
+    'customerName' => 'quick_create.customer_name',
+    'activityName' => 'quick_create.activity_name',
+    'add' => 'quick_create.add',
   ];
 
   /**
@@ -103,6 +109,8 @@ final class ScriptSubscriber implements EventSubscriberInterface
       'entries-url' => $this->urlGenerator->generate( InlineEditController::ROUTE_ENTRIES ),
       'options-url' => $this->urlGenerator->generate( InlineEditController::ROUTE_OPTIONS ),
       'save-url' => $this->urlGenerator->generate( InlineEditController::ROUTE_SAVE ),
+      'create-project-url' => $this->urlGenerator->generate( InlineEditController::ROUTE_CREATE_PROJECT ),
+      'create-activity-url' => $this->urlGenerator->generate( InlineEditController::ROUTE_CREATE_ACTIVITY ),
       'token' => $this->csrfTokenManager->getToken( InlineEditController::CSRF_TOKEN_ID )->getValue(),
       'messages' => (string) json_encode( $this->translateMessages() ),
     ] ) );

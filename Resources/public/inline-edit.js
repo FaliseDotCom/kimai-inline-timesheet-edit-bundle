@@ -127,6 +127,20 @@ const INVALID_CLASS = 'is-invalid';
 const FOCUSABLE = 'input, select, textarea, button, a, label';
 
 /**
+ * Class of the small "+" forms that create a project or an activity.
+ *
+ * @type {string}
+ */
+const CREATE_MENU_CLASS = 'inline-edit-create-menu';
+
+/**
+ * Class that puts a picker and its "+" button side by side.
+ *
+ * @type {string}
+ */
+const PICKER_CLASS = 'inline-edit-picker';
+
+/**
  * Event Kimai dispatches after it reloaded the list.
  *
  * @type {string}
@@ -164,12 +178,14 @@ const GLOBAL_ACTIVITY = 0;
 /**
  * Settings from the script tag.
  *
- * @type {{entriesUrl: string, optionsUrl: string, saveUrl: string, token: string, messages: Object<string, string>}}
+ * @type {{entriesUrl: string, optionsUrl: string, saveUrl: string, createProjectUrl: string, createActivityUrl: string, token: string, messages: Object<string, string>}}
  */
 const CONFIG = {
   entriesUrl: SCRIPT?.dataset.entriesUrl ?? '',
   optionsUrl: SCRIPT?.dataset.optionsUrl ?? '',
   saveUrl: SCRIPT?.dataset.saveUrl ?? '',
+  createProjectUrl: SCRIPT?.dataset.createProjectUrl ?? '',
+  createActivityUrl: SCRIPT?.dataset.createActivityUrl ?? '',
   token: SCRIPT?.dataset.token ?? '',
   messages: JSON.parse( SCRIPT?.dataset.messages ?? '{}' ),
 };
@@ -625,13 +641,212 @@ async function openRow( row, focusCell )
   }
 
   const fields = cells.map( ( { field, cell } ) => ( { field, cell, editor: createEditor( field, entry, cell, options ), original: [ ...cell.childNodes ] } ) );
-  fields.forEach( ( item ) => item.cell.replaceChildren( item.editor ) );
+  fields.forEach( ( item ) => item.cell.replaceChildren( wrapEditor( item, fields, entry, options ) ) );
   row.classList.add( EDITING_CLASS );
   row.title = '';
   editing = { row, entry, fields, saving: false };
 
   linkProjectToActivity( fields, entry, options );
   focusField( ( fields.find( ( item ) => item.cell === focusCell ) ?? fields[ 0 ] ).editor );
+}
+
+/**
+ * Returns what goes into a cell: the editor, with a "+" button next to the project and
+ * activity pickers when the user may create those.
+ *
+ * @param {RowField} item The field.
+ * @param {Array<RowField>} fields All fields of the row.
+ * @param {Object} entry The record.
+ * @param {?Object} options The loaded options.
+ * @returns {HTMLElement}
+ */
+function wrapEditor( item, fields, entry, options )
+{
+  if ( ( item.field !== 'project' && item.field !== 'activity' ) || !options?.quickCreate?.[ item.field ] )
+  {
+    return item.editor;
+  }
+
+  const wrapper = document.createElement( 'div' );
+  wrapper.className = PICKER_CLASS;
+  wrapper.append( item.editor, createQuickCreate( item.field, fields, entry, options ) );
+
+  return wrapper;
+}
+
+/**
+ * Creates a text field for the "+" form.
+ *
+ * @param {string} placeholder The placeholder, also its label.
+ * @returns {HTMLInputElement}
+ */
+function createMenuInput( placeholder )
+{
+  const input = createInput( '', placeholder );
+  input.maxLength = 150;
+  input.setAttribute( 'aria-label', placeholder );
+
+  return input;
+}
+
+/**
+ * Creates the "+" button with its small form for a new project (and customer) or activity.
+ *
+ * @param {string} type Either "project" or "activity".
+ * @param {Array<RowField>} fields The fields of the row.
+ * @param {Object} entry The record.
+ * @param {Object} options The loaded options, which the new item is added to.
+ * @returns {HTMLElement}
+ */
+function createQuickCreate( type, fields, entry, options )
+{
+  const label = type === 'project' ? CONFIG.messages.newProject : CONFIG.messages.newActivity;
+  const dropdown = document.createElement( 'div' );
+  dropdown.className = 'dropdown';
+
+  const toggle = document.createElement( 'button' );
+  toggle.type = 'button';
+  toggle.className = 'btn btn-sm btn-icon';
+  toggle.title = label;
+  toggle.setAttribute( 'aria-label', label );
+  toggle.setAttribute( 'aria-expanded', 'false' );
+  toggle.dataset.bsToggle = 'dropdown';
+  toggle.dataset.bsAutoClose = 'outside';
+  toggle.innerHTML = '<i class="fas fa-plus"></i>';
+
+  const menu = document.createElement( 'div' );
+  menu.className = 'dropdown-menu dropdown-menu-end ' + CREATE_MENU_CLASS;
+
+  const name = createMenuInput( type === 'project' ? CONFIG.messages.projectName : CONFIG.messages.activityName );
+  const customer = type === 'project' ? createMenuInput( CONFIG.messages.customerName ) : null;
+  const submit = document.createElement( 'button' );
+  submit.type = 'button';
+  submit.className = 'btn btn-primary btn-sm';
+  submit.textContent = CONFIG.messages.add;
+
+  menu.append( ...[ name, customer, submit ].filter( Boolean ) );
+  if ( customer !== null )
+  {
+    const list = document.createElement( 'datalist' );
+    list.id = 'inline-edit-customers-' + entry.projectId + '-' + Date.now();
+    options.quickCreate.customers.forEach( ( customerName ) => list.append( new Option( customerName ) ) );
+    customer.setAttribute( 'list', list.id );
+    menu.append( list );
+  }
+
+  const create = async () =>
+  {
+    const project = fields.find( ( item ) => item.field === 'project' )?.editor;
+    const body = new FormData();
+    body.append( '_token', CONFIG.token );
+    body.append( 'name', name.value );
+    body.append( 'customer', customer?.value ?? '' );
+    body.append( 'project', project?.value ?? String( entry.projectId ) );
+
+    let created;
+    try
+    {
+      created = await fetchJson( type === 'project' ? CONFIG.createProjectUrl : CONFIG.createActivityUrl, { method: 'POST', body } );
+    }
+    catch ( error )
+    {
+      showError( error.message );
+      return;
+    }
+
+    if ( type === 'project' )
+    {
+      addCreatedProject( created, fields, options );
+    }
+    else
+    {
+      addCreatedActivity( created, fields, entry, options );
+    }
+
+    [ name, customer ].forEach( ( input ) => { if ( input !== null ) { input.value = ''; } } );
+    toggle.click();
+    fields.find( ( item ) => item.field === type )?.editor.focus();
+  };
+
+  submit.addEventListener( 'click', create );
+  menu.addEventListener( 'keydown', ( event ) =>
+  {
+    if ( event.key === 'Enter' )
+    {
+      event.preventDefault();
+      create();
+    }
+  } );
+  dropdown.addEventListener( 'shown.bs.dropdown', () => name.focus() );
+  dropdown.append( toggle, menu );
+
+  return dropdown;
+}
+
+/**
+ * Adds a created project to the loaded options and the project picker, and selects it.
+ *
+ * @param {{id: number, name: string, customer: string, globalActivities: boolean}} project The new project.
+ * @param {Array<RowField>} fields The fields of the row.
+ * @param {Object} options The loaded options.
+ * @returns {void}
+ */
+function addCreatedProject( project, fields, options )
+{
+  let group = options.customers.find( ( item ) => item.name === project.customer );
+  if ( group === undefined )
+  {
+    group = { name: project.customer, projects: [] };
+    options.customers.push( group );
+  }
+
+  if ( !group.projects.some( ( item ) => item.id === project.id ) )
+  {
+    group.projects.push( { id: project.id, name: project.name, globalActivities: project.globalActivities } );
+  }
+
+  const select = fields.find( ( item ) => item.field === 'project' ).editor;
+  if ( select.querySelector( 'option[value="' + project.id + '"]' ) === null )
+  {
+    let optgroup = [ ...select.querySelectorAll( 'optgroup' ) ].find( ( item ) => item.label === project.customer );
+    if ( optgroup === undefined )
+    {
+      optgroup = document.createElement( 'optgroup' );
+      optgroup.label = project.customer;
+      select.append( optgroup );
+    }
+
+    optgroup.append( new Option( project.name, String( project.id ) ) );
+  }
+
+  select.value = String( project.id );
+  // Refills the activity picker for the new project.
+  select.dispatchEvent( new Event( 'change' ) );
+}
+
+/**
+ * Adds a created activity to the loaded options and the activity picker, and selects it.
+ *
+ * @param {{id: number, name: string, projectId: number}} activity The new activity.
+ * @param {Array<RowField>} fields The fields of the row.
+ * @param {Object} entry The record.
+ * @param {Object} options The loaded options.
+ * @returns {void}
+ */
+function addCreatedActivity( activity, fields, entry, options )
+{
+  if ( !options.activities.some( ( item ) => item.id === activity.id ) )
+  {
+    options.activities.push( activity );
+  }
+
+  const project = fields.find( ( item ) => item.field === 'project' )?.editor;
+  const select = fields.find( ( item ) => item.field === 'activity' ).editor;
+  const fresh = createActivitySelect( options, Number( project?.value ?? entry.projectId ), entry, String( activity.id ) );
+  const value = fresh.value;
+
+  select.replaceChildren( ...fresh.children );
+  select.value = value;
 }
 
 /**
@@ -929,7 +1144,8 @@ document.addEventListener( 'mousedown', ( event ) =>
 
 document.addEventListener( 'keydown', ( event ) =>
 {
-  if ( editing === null || !editing.row.contains( event.target ) )
+  // The "+" forms handle their own Enter, and Escape closes them, not the record.
+  if ( editing === null || !editing.row.contains( event.target ) || event.target.closest( '.' + CREATE_MENU_CLASS ) !== null )
   {
     return;
   }

@@ -46,6 +46,50 @@
         <source>inline_edit.tags_placeholder</source>
         <target>Tags, separated by commas</target>
       </trans-unit>
+      <trans-unit id="quick_create.new_project" resname="quick_create.new_project">
+        <source>quick_create.new_project</source>
+        <target>New project</target>
+      </trans-unit>
+      <trans-unit id="quick_create.new_activity" resname="quick_create.new_activity">
+        <source>quick_create.new_activity</source>
+        <target>New activity</target>
+      </trans-unit>
+      <trans-unit id="quick_create.project_name" resname="quick_create.project_name">
+        <source>quick_create.project_name</source>
+        <target>Project name</target>
+      </trans-unit>
+      <trans-unit id="quick_create.customer_name" resname="quick_create.customer_name">
+        <source>quick_create.customer_name</source>
+        <target>Customer, new or existing</target>
+      </trans-unit>
+      <trans-unit id="quick_create.activity_name" resname="quick_create.activity_name">
+        <source>quick_create.activity_name</source>
+        <target>Activity name</target>
+      </trans-unit>
+      <trans-unit id="quick_create.add" resname="quick_create.add">
+        <source>quick_create.add</source>
+        <target>Add</target>
+      </trans-unit>
+      <trans-unit id="quick_create.name_required" resname="quick_create.name_required">
+        <source>quick_create.name_required</source>
+        <target>Enter a name of at most 150 characters.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.create_project" resname="quick_create.create_project">
+        <source>quick_create.create_project</source>
+        <target>You may not create projects.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.create_customer" resname="quick_create.create_customer">
+        <source>quick_create.create_customer</source>
+        <target>This customer does not exist yet, and you may not create customers.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.create_activity" resname="quick_create.create_activity">
+        <source>quick_create.create_activity</source>
+        <target>You may not create activities.</target>
+      </trans-unit>
+      <trans-unit id="quick_create.failed" resname="quick_create.failed">
+        <source>quick_create.failed</source>
+        <target>This could not be created. Reload the page and try again.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

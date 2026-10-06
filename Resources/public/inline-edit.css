@@ -53,3 +53,37 @@ textarea.inline-edit-field
   min-width: 0;
   width: 1em;
 }
+
+/* A picker with its "+" button for a new project or activity */
+.inline-edit-picker
+{
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inline-edit-picker > .inline-edit-field
+{
+  flex: 1 1 auto;
+}
+
+/* The "+" button matches the height of the small picker next to it */
+.inline-edit-picker > .dropdown > .btn
+{
+  height: calc(1.5em + 0.5rem + 2px);
+  padding: 0 0.5rem;
+  color: var(--tblr-secondary);
+}
+
+.inline-edit-create-menu
+{
+  min-width: 16rem;
+  padding: 0.5rem;
+}
+
+.inline-edit-create-menu.show
+{
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
