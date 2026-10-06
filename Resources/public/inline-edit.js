@@ -947,6 +947,8 @@ document.addEventListener( 'keydown', ( event ) =>
 }, true );
 
 // Leaving the record, with Tab past its last field or by clicking elsewhere, saves it.
+// Switching to another window, for example to take a screenshot, keeps it open: the check
+// waits until the focus has settled and skips it when the page itself lost the focus.
 document.addEventListener( 'focusout', ( event ) =>
 {
   if ( editing === null || !editing.row.contains( event.target ) || editing.row.contains( event.relatedTarget ) )
@@ -954,7 +956,13 @@ document.addEventListener( 'focusout', ( event ) =>
     return;
   }
 
-  commitRow( true );
+  setTimeout( () =>
+  {
+    if ( editing !== null && document.hasFocus() && !editing.row.contains( document.activeElement ) )
+    {
+      commitRow( true );
+    }
+  }, 0 );
 } );
 
 document.addEventListener( KIMAI_RELOADED_EVENT, markRows );

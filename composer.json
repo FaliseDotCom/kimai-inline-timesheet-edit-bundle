@@ -3,7 +3,7 @@
   "description": "Edit your own Kimai records directly in the record list: click a record, Tab between its fields and press Enter to save",
   "homepage": "https://github.com/FaliseDotCom/ha-kimai",
   "type": "kimai-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [ "kimai", "kimai-plugin" ],
   "license": "MIT",
   "authors": [
