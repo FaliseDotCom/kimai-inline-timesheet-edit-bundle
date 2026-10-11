@@ -19,8 +19,10 @@ use App\Repository\Query\CustomerFormTypeQuery;
 use App\Repository\Query\ProjectFormTypeQuery;
 use App\Utils\Context;
 use App\Validator\ValidationFailedException;
+use Doctrine\ORM\EntityManagerInterface;
 use KimaiPlugin\InlineTimesheetEditBundle\Exception\InvalidInputException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Throwable;
 
 /**
  * Creates projects, customers and activities from just a name, with Kimai's defaults, the way
@@ -69,6 +71,7 @@ final class QuickCreator
    * @param CustomerRepository $customerRepository Finds the customers the user may see.
    * @param ProjectRepository $projectRepository Finds the projects the user may book on.
    * @param ActivityRepository $activityRepository Finds the activities the user may book on.
+   * @param EntityManagerInterface $entityManager Runs the creation of a customer and its project as one.
    */
   public function __construct(
     private readonly AuthorizationCheckerInterface $security,
@@ -77,7 +80,8 @@ final class QuickCreator
     private readonly ActivityService $activityService,
     private readonly CustomerRepository $customerRepository,
     private readonly ProjectRepository $projectRepository,
-    private readonly ActivityRepository $activityRepository
+    private readonly ActivityRepository $activityRepository,
+    private readonly EntityManagerInterface $entityManager
   )
   {
   }
@@ -132,7 +136,40 @@ final class QuickCreator
 
     // Checked before a new customer is made, so a refusal leaves nothing behind.
     $this->requirePermission( self::PERMISSION_PROJECT );
-    $customer ??= $this->createCustomer( $customerName );
+    if ( $customer !== null )
+    {
+      return $this->saveProject( $user, $customer, $name );
+    }
+
+    // A new customer is only kept when Kimai accepts its project too.
+    $connection = $this->entityManager->getConnection();
+    $connection->beginTransaction();
+    try
+    {
+      $project = $this->saveProject( $user, $this->createCustomer( $customerName ), $name );
+      $connection->commit();
+
+      return $project;
+    }
+    catch ( Throwable $exception )
+    {
+      $connection->rollBack();
+
+      throw $exception;
+    }
+  }
+
+  /**
+   * Creates and saves a project under the customer.
+   *
+   * @param User $user The logged-in user.
+   * @param Customer $customer The project's customer.
+   * @param string $name The project name.
+   * @return Project
+   * @throws ValidationFailedException When Kimai refuses the project.
+   */
+  private function saveProject( User $user, Customer $customer, string $name ) : Project
+  {
     $project = $this->projectService->createNewProject( $customer );
     $project->setName( $name );
 
