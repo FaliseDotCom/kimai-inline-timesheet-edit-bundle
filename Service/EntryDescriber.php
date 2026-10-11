@@ -13,8 +13,8 @@ use DateTimeZone;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
- * Describes the user's own records that may be edited in the list, with the raw values the
- * editors start from.
+ * Describes the user's own finished records that may be edited in the list, with the raw values
+ * the editors start from. A running record is left out: the quick start bar edits it.
  *
  * @phpstan-type EntryValues array{
  *   date: string,
@@ -100,7 +100,7 @@ final class EntryDescriber
   }
 
   /**
-   * Tells whether the record belongs to the user and they may edit it.
+   * Tells whether the record is finished, belongs to the user and they may edit it.
    *
    * @param User $user The logged-in user.
    * @param Timesheet $entry The record.
@@ -108,7 +108,7 @@ final class EntryDescriber
    */
   private function isEditable( User $user, Timesheet $entry ) : bool
   {
-    return $entry->getUser()?->getId() === $user->getId() && $this->security->isGranted( 'edit', $entry );
+    return $entry->getEnd() !== null && $entry->getUser()?->getId() === $user->getId() && $this->security->isGranted( 'edit', $entry );
   }
 
   /**

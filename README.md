@@ -20,10 +20,12 @@ Times and durations accept the same short forms as the
 [short time entries](https://github.com/FaliseDotCom/kimai-short-time-entries-bundle) plugin,
 such as `945` for 9:45 and `90` for an hour and a half, and every format Kimai itself reads.
 
-Only records the user owns and may edit are offered, and only the fields Kimai's tracking
-mode and permissions allow (billable needs `edit_billable`, new tags need `create_tag`).
-Clicking a record never opens Kimai's edit dialog while this is on, also not for other
-users' records; **Edit** in the actions menu still does. Every change goes through
+Only finished records the user owns and may edit are offered, and only the fields Kimai's
+tracking mode and permissions allow (billable needs `edit_billable`, new tags need
+`create_tag`). A running record is left to the
+[quick start bar](https://github.com/FaliseDotCom/kimai-quick-timer-bar-bundle). Clicking a
+record never opens Kimai's edit dialog while this is on, also not for other users' records
+or the running one; **Edit** in the actions menu still does. Every change goes through
 `TimesheetService`, so Kimai's validation, rounding and rate calculation apply, and a
 refusal is shown with Kimai's own message.
 
