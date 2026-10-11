@@ -193,7 +193,7 @@ final class QuickCreator
     $name = $this->cleanName( $name );
     $owner = $project !== null && !$project->isGlobalActivities() ? $project : null;
 
-    $existing = $this->findByName( $this->findActivities( $user ), $name, fn( Activity $activity ) : bool => $activity->getProject()?->getId() === $owner?->getId() );
+    $existing = $this->findByName( $this->findActivities( $user, $owner ), $name, fn( Activity $activity ) : bool => $activity->getProject()?->getId() === $owner?->getId() );
     if ( $existing !== null )
     {
       return $existing;
@@ -316,14 +316,16 @@ final class QuickCreator
   }
 
   /**
-   * Returns the activities the user may book on, by ID.
+   * Returns the activities the user may book on, by ID: the global ones, and those of the
+   * project when one is given. Without a project, Kimai's query leaves project activities out.
    *
    * @param User $user The logged-in user.
+   * @param Project|null $project The project whose own activities count too, or null.
    * @return array<int, Activity>
    */
-  private function findActivities( User $user ) : array
+  private function findActivities( User $user, ?Project $project = null ) : array
   {
-    $query = new ActivityFormTypeQuery();
+    $query = new ActivityFormTypeQuery( null, $project );
     $query->setUser( $user );
 
     return $this->indexById( $this->activityRepository->getQueryBuilderForFormType( $query )->getQuery()->getResult(), Activity::class );
