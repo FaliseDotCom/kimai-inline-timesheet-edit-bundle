@@ -394,7 +394,8 @@ function openPending()
   const row = pending === null ? null : document.querySelector( 'tr[data-inline-entry="' + pending.id + '"]' );
   if ( row !== null )
   {
-    openRow( row, row.querySelector( 'td.' + pending.column ) );
+    // A click on a column without a field leaves no column to focus.
+    openRow( row, pending.column === '' ? null : row.querySelector( 'td.' + pending.column ) );
   }
 }
 
