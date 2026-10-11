@@ -28,7 +28,7 @@ final class BookingOptions
   /**
    * @param ProjectRepository $projectRepository Finds the projects a user may book on.
    * @param ActivityRepository $activityRepository Finds the activities a user may book on.
-   * @param TagRepository $tagRepository Finds and stores tags.
+   * @param TagRepository $tagRepository Finds tags.
    * @param AuthorizationCheckerInterface $security Checks the tag permission.
    */
   public function __construct(
@@ -122,7 +122,9 @@ final class BookingOptions
 
   /**
    * Returns the tags with the given names. Missing tags are created when the user may create
-   * tags; otherwise they are returned in the second list.
+   * tags; otherwise they are returned in the second list. New tags are not saved here: the
+   * record saves them along with itself, after Kimai validated both. Saving them here would
+   * also save the record's pending changes before validation.
    *
    * @param array<int, string> $names Tag names.
    * @return array{0: array<int, Tag>, 1: array<int, string>}
@@ -139,7 +141,6 @@ final class BookingOptions
       {
         $tag = new Tag();
         $tag->setName( $name );
-        $this->tagRepository->saveTag( $tag );
       }
 
       if ( $tag === null )
