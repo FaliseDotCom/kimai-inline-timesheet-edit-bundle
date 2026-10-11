@@ -13,6 +13,7 @@ use App\Repository\ProjectRepository;
 use App\Repository\Query\ActivityFormTypeQuery;
 use App\Repository\Query\ProjectFormTypeQuery;
 use App\Repository\TagRepository;
+use KimaiPlugin\InlineTimesheetEditBundle\Exception\InvalidInputException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
@@ -25,6 +26,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
  */
 final class BookingOptions
 {
+  /**
+   * Most new tags one change may create.
+   *
+   * @var int
+   */
+  public const MAX_NEW_TAGS = 20;
+
   /**
    * @param ProjectRepository $projectRepository Finds the projects a user may book on.
    * @param ActivityRepository $activityRepository Finds the activities a user may book on.
@@ -123,22 +131,29 @@ final class BookingOptions
   /**
    * Returns the tags with the given names. Missing tags are created when the user may create
    * tags; otherwise they are returned in the second list. New tags are not saved here: the
-   * record saves them along with itself, after Kimai validated both. Saving them here would
-   * also save the record's pending changes before validation.
+   * record saves them along with itself, after Kimai validated both, so a refused change leaves
+   * no tags behind.
    *
    * @param array<int, string> $names Tag names.
    * @return array{0: array<int, Tag>, 1: array<int, string>}
+   * @throws InvalidInputException When more new tags are given than one change may create.
    */
   public function findOrCreateTags( array $names ) : array
   {
     $tags = [];
     $missing = [];
+    $created = 0;
     foreach ( $names as $name )
     {
       $tag = $this->tagRepository->findTagByName( $name );
 
       if ( $tag === null && $this->canCreateTags() )
       {
+        if ( ++$created > self::MAX_NEW_TAGS )
+        {
+          throw new InvalidInputException( 'inline_edit.too_many_tags' );
+        }
+
         $tag = new Tag();
         $tag->setName( $name );
       }

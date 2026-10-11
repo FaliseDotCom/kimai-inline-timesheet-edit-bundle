@@ -34,6 +34,10 @@
         <source>inline_edit.unknown_tags</source>
         <target>Een of meer tags bestaan niet, en je mag geen tags aanmaken.</target>
       </trans-unit>
+      <trans-unit id="inline_edit.too_many_tags" resname="inline_edit.too_many_tags">
+        <source>inline_edit.too_many_tags</source>
+        <target>Te veel nieuwe tags tegelijk. Voeg ze in kleinere stappen toe.</target>
+      </trans-unit>
       <trans-unit id="inline_edit.not_editable" resname="inline_edit.not_editable">
         <source>inline_edit.not_editable</source>
         <target>Deze registratie kan hier niet worden gewijzigd.</target>

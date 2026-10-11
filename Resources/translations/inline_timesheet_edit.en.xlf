@@ -34,6 +34,10 @@
         <source>inline_edit.unknown_tags</source>
         <target>One or more tags do not exist, and you may not create tags.</target>
       </trans-unit>
+      <trans-unit id="inline_edit.too_many_tags" resname="inline_edit.too_many_tags">
+        <source>inline_edit.too_many_tags</source>
+        <target>Too many new tags at once. Add them in smaller steps.</target>
+      </trans-unit>
       <trans-unit id="inline_edit.not_editable" resname="inline_edit.not_editable">
         <source>inline_edit.not_editable</source>
         <target>This record cannot be changed here.</target>
