@@ -7,7 +7,9 @@ namespace KimaiPlugin\InlineTimesheetEditBundle\Controller;
 use App\Controller\AbstractController;
 use KimaiPlugin\InlineTimesheetEditBundle\InlineTimesheetEditBundle;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -29,13 +31,15 @@ final class AssetController extends AbstractController
   private const MAX_AGE = 86400;
 
   /**
-   * Serves one asset.
+   * Serves one asset. Browsers keep it for a day, and afterwards ask whether it changed; a new
+   * release changes the version in its address anyway.
    *
+   * @param Request $request The request, for answering "not modified".
    * @param string $name The file name, one of the keys of InlineTimesheetEditBundle::ASSETS.
    * @return Response
    */
   #[Route( path: '/{name}', name: self::ROUTE, methods: [ 'GET' ] )]
-  public function asset( string $name ) : Response
+  public function asset( Request $request, string $name ) : Response
   {
     if ( !isset( InlineTimesheetEditBundle::ASSETS[ $name ] ) )
     {
@@ -44,8 +48,12 @@ final class AssetController extends AbstractController
 
     $response = new BinaryFileResponse( InlineTimesheetEditBundle::ASSET_DIRECTORY . '/' . $name );
     $response->headers->set( 'Content-Type', InlineTimesheetEditBundle::ASSETS[ $name ] );
-    $response->setPublic();
+    // Private, because the route needs a login. Symfony turns caching off for every response
+    // of a request that reads the session, unless this header says the response is safe.
+    $response->setPrivate();
     $response->setMaxAge( self::MAX_AGE );
+    $response->headers->set( AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true' );
+    $response->isNotModified( $request );
 
     return $response;
   }
