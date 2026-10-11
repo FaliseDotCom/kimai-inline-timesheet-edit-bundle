@@ -176,6 +176,13 @@ const TAG_SEPARATOR = ', ';
 const GLOBAL_ACTIVITY = 0;
 
 /**
+ * Characters with a meaning in HTML, and the entities that show them as text.
+ *
+ * @type {Object<string, string>}
+ */
+const HTML_ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+/**
  * Settings from the script tag.
  *
  * @type {{entriesUrl: string, optionsUrl: string, saveUrl: string, createProjectUrl: string, createActivityUrl: string, token: string, messages: Object<string, string>}}
@@ -267,7 +274,19 @@ function loadOptions()
 }
 
 /**
- * Shows an error the way Kimai shows its own.
+ * Returns text with the characters that have a meaning in HTML replaced by entities.
+ *
+ * @param {string} text The text.
+ * @returns {string}
+ */
+function escapeHtml( text )
+{
+  return text.replace( /[&<>"']/g, ( character ) => HTML_ENTITIES[ character ] );
+}
+
+/**
+ * Shows an error the way Kimai shows its own. Kimai's alert puts the message into its dialog
+ * as HTML, so it is escaped first: a message may repeat a name or value someone typed.
  *
  * @param {string} message The message.
  * @returns {void}
@@ -277,7 +296,7 @@ function showError( message )
   const alert = window.kimai?.getPlugin( 'alert' );
   if ( alert )
   {
-    alert.error( message );
+    alert.error( escapeHtml( String( message ) ) );
     return;
   }
 
