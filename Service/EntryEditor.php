@@ -84,6 +84,14 @@ final class EntryEditor
   private const MINUTE = 60;
 
   /**
+   * Longest duration or break in minutes: a year. Longer values only produce dates the
+   * database cannot store.
+   *
+   * @var int
+   */
+  private const MAX_MINUTES = 525600;
+
+  /**
    * @param TimesheetService $timesheetService Validates and saves records, and knows the tracking mode.
    * @param SystemConfiguration $configuration Tells whether breaks are enabled.
    * @param AuthorizationCheckerInterface $security Checks the billable permission.
@@ -447,14 +455,15 @@ final class EntryEditor
   }
 
   /**
-   * Reads a whole number of minutes.
+   * Reads a whole number of minutes, up to a year.
    *
    * @param string $value The minutes.
    * @return int
    */
   private function parseMinutes( string $value ) : int
   {
-    if ( !ctype_digit( $value ) )
+    // The length check comes first, so a huge number never reaches the integer cast.
+    if ( !ctype_digit( $value ) || strlen( $value ) > strlen( (string) self::MAX_MINUTES ) || (int) $value > self::MAX_MINUTES )
     {
       throw new InvalidInputException( 'inline_edit.invalid_duration' );
     }
