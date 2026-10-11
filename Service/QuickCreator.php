@@ -17,6 +17,7 @@ use App\Repository\ProjectRepository;
 use App\Repository\Query\ActivityFormTypeQuery;
 use App\Repository\Query\CustomerFormTypeQuery;
 use App\Repository\Query\ProjectFormTypeQuery;
+use App\Utils\Context;
 use App\Validator\ValidationFailedException;
 use KimaiPlugin\InlineTimesheetEditBundle\Exception\InvalidInputException;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -135,7 +136,8 @@ final class QuickCreator
     $project = $this->projectService->createNewProject( $customer );
     $project->setName( $name );
 
-    return $this->projectService->saveProject( $project );
+    // The context lets Kimai give the project the user's teams, when it is set to.
+    return $this->projectService->saveProject( $project, new Context( $user ) );
   }
 
   /**
