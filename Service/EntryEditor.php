@@ -84,6 +84,13 @@ final class EntryEditor
   private const MINUTE = 60;
 
   /**
+   * Seconds per day.
+   *
+   * @var int
+   */
+  private const DAY = 86400;
+
+  /**
    * Longest duration or break in minutes: a year. Longer values only produce dates the
    * database cannot store.
    *
@@ -236,7 +243,9 @@ final class EntryEditor
   }
 
   /**
-   * Changes the start time on the same day; the end stays where it is.
+   * Changes the start time on the same day; the end keeps its time. A record that ran into
+   * the next day, such as one saved with its end before its start, moves its end back to the
+   * start's day when it now fits there; otherwise the end stays where it is.
    *
    * @param Timesheet $entry The record.
    * @param string $value The new start time.
@@ -245,13 +254,32 @@ final class EntryEditor
    */
   private function changeBegin( Timesheet $entry, string $value, DateTimeZone $timezone ) : void
   {
-    $entry->setBegin( DateTime::createFromImmutable( $this->parseTime( $value, $this->getLocalBegin( $entry, $timezone ) ) ) );
+    $oldBegin = $this->getLocalBegin( $entry, $timezone );
+    $begin = $this->parseTime( $value, $oldBegin );
+    $entry->setBegin( DateTime::createFromImmutable( $begin ) );
 
     $end = $entry->getEnd();
     if ( $end !== null )
     {
-      $this->setEnd( $entry, DateTimeImmutable::createFromMutable( $end ) );
+      $this->setEnd( $entry, $this->fitEnd( DateTimeImmutable::createFromMutable( $end )->setTimezone( $timezone ), $oldBegin, $begin ) );
     }
+  }
+
+  /**
+   * Returns the end of a record whose start changed. An end less than a day after the old
+   * start, whose time also comes after the new start on that day, is moved to that day.
+   *
+   * @param DateTimeImmutable $end The end, in the user's time zone.
+   * @param DateTimeImmutable $oldBegin The previous start.
+   * @param DateTimeImmutable $begin The new start.
+   * @return DateTimeImmutable
+   */
+  private function fitEnd( DateTimeImmutable $end, DateTimeImmutable $oldBegin, DateTimeImmutable $begin ) : DateTimeImmutable
+  {
+    $sameDay = $begin->setTime( (int) $end->format( 'G' ), (int) $end->format( 'i' ), (int) $end->format( 's' ) );
+    $length = $end->getTimestamp() - $oldBegin->getTimestamp();
+
+    return $length < self::DAY && $sameDay > $begin ? $sameDay : $end;
   }
 
   /**
