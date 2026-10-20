@@ -19,6 +19,9 @@ project's activities, and asks for one when the record's activity does not fit.
 Times and durations accept the same short forms as the
 [short time entries](https://github.com/FaliseDotCom/kimai-short-time-entries-bundle) plugin,
 such as `945` for 9:45 and `90` for an hour and a half, and every format Kimai itself reads.
+An end before the start is on the next day. Changing the start of such a record moves its end
+back to the start's day when it fits there, so a record of 19:30 to 19:15 changed to start at
+19:00 lasts 0:15, not 24:15. A duration or break of more than a year is refused.
 
 Only finished records the user owns and may edit are offered, and only the fields Kimai's
 tracking mode and permissions allow (billable needs `edit_billable`, new tags need
@@ -27,7 +30,8 @@ tracking mode and permissions allow (billable needs `edit_billable`, new tags ne
 record never opens Kimai's edit dialog while this is on, also not for other users' records
 or the running one; **Edit** in the actions menu still does. Every change goes through
 `TimesheetService`, so Kimai's validation, rounding and rate calculation apply, and a
-refusal is shown with Kimai's own message.
+refusal is shown with Kimai's own message, as text. New tags are only saved together with
+their record, after Kimai accepted both, and one change creates at most 20 of them.
 
 Each user can turn this off with the **Edit records directly in the list** preference
 (`inline_edit_enabled`, on by default).
@@ -38,9 +42,11 @@ A **+** button next to the project picker adds a project from just its name and 
 an existing one or a new one; a **+** next to the activity picker adds an activity. The new
 item is selected straight away. Kimai's defaults apply (a new customer gets the default
 country, currency, language and time zone), and everything can be changed later in Kimai's
-own forms. A name that already exists is reused instead of creating a duplicate. A new
-activity is global, unless the selected project only allows its own activities; then it
-belongs to that project.
+own forms. A name that already exists is reused instead of creating a duplicate, also an
+activity that belongs to the selected project. A new activity is global, unless the selected
+project only allows its own activities; then it belongs to that project. A new project gets
+the creator's teams when Kimai's **copy teams on create** setting is on, as in Kimai's own
+form, and a new customer is only kept when Kimai accepts its project too.
 
 The buttons need Kimai's `create_project` and `create_activity` permissions; a new customer
 also needs `create_customer`. `Service/QuickCreator.php` creates everything through Kimai's
@@ -66,6 +72,8 @@ reloads the list, and `kimai.reloadedContent` marks the new rows.
 The parsing of typed times and durations lives in `input-parsing.js`, which the script
 imports with its own version query, so a release never mixes old and new files from the
 browser cache. The short time entries plugin carries an identical copy; change both together.
+The plugin serves its own script and stylesheet; browsers keep them for a day, and a release
+changes the version in their address.
 
 ## Requirements and installation
 
